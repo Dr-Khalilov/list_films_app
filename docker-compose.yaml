@@ -29,9 +29,9 @@ services:
       - films-net
   redis-commander:
     container_name: redis-commander
-    image: rediscommander/redis-commander:redis-commander-210
+    image: rediscommander/redis-commander:latest
     environment:
-      - REDIS_HOSTS=local:redis:6379
+      - REDIS_HOSTS=local:redis:${REDIS_PORT}
     ports:
       - ${REDIS_COMMANDER_PORT}:${REDIS_COMMANDER_PORT}
     networks:

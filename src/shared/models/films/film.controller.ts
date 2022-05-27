@@ -1,5 +1,8 @@
 import {
     Body,
+    CacheInterceptor,
+    CacheKey,
+    CacheTTL,
     Controller,
     Get,
     HttpCode,
@@ -9,6 +12,7 @@ import {
     Param,
     Post,
     Query,
+    UseInterceptors,
 } from '@nestjs/common';
 import {
     ApiBadRequestResponse,
@@ -20,9 +24,10 @@ import {
 } from '@nestjs/swagger';
 import { FilmEntity } from './film.entity';
 import { FilmService } from './film.service';
-import { PaginateResponse } from '../utils/paginate-response.dto';
+import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { IQuery } from './query.interface';
 import { FilmDto } from './film.dto';
+import { CacheResponse } from '../../common/enums/cache-response.enum';
 
 @ApiTags('Films')
 @Injectable()
@@ -66,6 +71,9 @@ export class FilmController {
     @ApiOkResponse({ type: FilmEntity })
     @ApiNotFoundResponse()
     @HttpCode(HttpStatus.OK)
+    @UseInterceptors(CacheInterceptor)
+    @CacheKey(CacheResponse.GET_FILM_TITLE_CACHE)
+    @CacheTTL(15)
     @Get('/:title')
     async findOne(@Param('title') title: string): Promise<FilmEntity> {
         return await this.filmService.findFilmByTitle(title);

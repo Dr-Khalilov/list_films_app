@@ -1,13 +1,15 @@
 import {
     BadRequestException,
+    Inject,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FilmRepository } from './film.repository';
 import { FilmEntity } from './film.entity';
-import { paginateResponse } from '../utils/paginate-response.util';
-import { PaginateResponse } from '../utils/paginate-response.dto';
+import { RedisCacheService } from '../../cache/redis-cache.service';
+import { paginateResponse } from '../../common/utils/paginate-response.util';
+import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { IQuery } from './query.interface';
 
 @Injectable()
@@ -15,6 +17,8 @@ export class FilmService {
     constructor(
         @InjectRepository(FilmRepository)
         private readonly filmRepository: FilmRepository,
+        @Inject(RedisCacheService)
+        private readonly redisCacheService: RedisCacheService,
     ) {}
 
     public async createFilm(data): Promise<FilmEntity> {
@@ -30,6 +34,7 @@ export class FilmService {
         if (!film) {
             throw new NotFoundException('Film with this title not found');
         }
+        // await this.redisCacheService.get(film);
         return film;
     }
 
