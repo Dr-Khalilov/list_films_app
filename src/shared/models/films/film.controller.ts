@@ -21,10 +21,10 @@ import {
 } from '@nestjs/swagger';
 import { FilmEntity } from './film.entity';
 import { FilmService } from './film.service';
-import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.interceptor';
 import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { FilmDto } from './film.dto';
 import { IQuery } from './query.interface';
+import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.interceptor';
 
 @ApiTags('Films')
 @Injectable()
@@ -74,9 +74,8 @@ export class FilmController {
     async findOne(
         @Param('title') title: string,
     ): Promise<{ data: FilmEntity }> {
-        const foundFilm: FilmEntity = await this.filmService.findFilmByTitle(
-            title,
-        );
+        const foundFilm: FilmEntity =
+            await this.filmService.findFilmFromCacheOrDb(title);
         return { data: foundFilm };
     }
 }

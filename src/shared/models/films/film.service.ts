@@ -11,7 +11,6 @@ import { RedisCacheService } from '../../cache/redis-cache.service';
 import { paginateResponse } from '../../common/utils/paginate-response.util';
 import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { IQuery } from './query.interface';
-import { CacheResponse } from '../../common/enums/cache-response.enum';
 
 @Injectable()
 export class FilmService {
@@ -38,12 +37,27 @@ export class FilmService {
         if (!film) {
             throw new NotFoundException('Film with this title not found');
         }
-        await this.redisCacheService.set(
-            CacheResponse.GET_FILM_TITLE_CACHE,
-            film,
-        );
-        await this.redisCacheService.get(CacheResponse.GET_FILM_TITLE_CACHE);
         return film;
+    }
+
+    public async findFilmFromCacheOrDb(title: string) {
+        const cache = new Map();
+        if (cache.has(title)) {
+            console.log('Node cache', cache);
+            return cache.get(title);
+        } else if (!cache.has(title)) {
+            const filmFromRedisCache = await this.redisCacheService.get(title);
+            console.log('Redis cache', filmFromRedisCache);
+            if (filmFromRedisCache) {
+                return filmFromRedisCache;
+            } else {
+                const filmFromDb = await this.findFilmByTitle(title);
+                cache.set(title, filmFromDb);
+                await this.redisCacheService.set(title, filmFromDb);
+                setTimeout(() => cache.delete(title), 15000);
+                return filmFromDb;
+            }
+        }
     }
 
     public async findAllFilms(query: IQuery): Promise<PaginateResponse> {
