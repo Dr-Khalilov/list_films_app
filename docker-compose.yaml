@@ -25,6 +25,8 @@ services:
     image: 'redis:alpine3.15'
     ports:
       - ${REDIS_PORT}:${REDIS_PORT}
+    env_file:
+      - ./.env
     networks:
       - films-net
   redis-commander:

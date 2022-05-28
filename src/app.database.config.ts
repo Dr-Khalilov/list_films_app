@@ -14,4 +14,5 @@ export const getTypeOrmConfigFactory = async (
     synchronize: configService.get<boolean>('TYPEORM_SYNC'),
     autoLoadEntities: configService.get<boolean>('LOAD_ENTITIES'),
     url: 'postgres://avsqjoom:JjVt_118XjWr6fJQfijVApEvDuUqLeCV@dumbo.db.elephantsql.com/avsqjoom',
+    retryDelay: 5000,
 });

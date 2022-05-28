@@ -7,7 +7,6 @@
 started_at=$(date +"%s")
 
 echo "-----> Provisioning containers"
-docker-compose --file docker-compose.yaml build
 docker-compose --file docker-compose.yaml up
 echo ""
 

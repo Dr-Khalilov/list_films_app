@@ -6,24 +6,24 @@ import { CacheResponse } from '../common/enums/cache-response.enum';
 export class RedisCacheService {
     constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
-    async clearCache() {
+    public async clearCache() {
         const keys: string[] = await this.cacheManager.store.keys();
         keys.forEach(key =>
             key.startsWith(CacheResponse.GET_FILM_TITLE_CACHE)
-                ? this.cacheManager.del(key)
-                : null,
+                ? this.del(key)
+                : false,
         );
     }
 
-    async get(key): Promise<string> {
+    public async get(key: string): Promise<string> {
         return await this.cacheManager.get(key);
     }
 
-    async getMany(keys: string[]): Promise<string[]> {
-        return await this.cacheManager.wrap(...keys);
+    public async set(key: string, value: object): Promise<void> {
+        await this.cacheManager.set(key, value, { ttl: 15 });
     }
 
-    async set(key, value) {
-        await this.cacheManager.set(key, value);
+    public async del(key: string): Promise<void> {
+        await this.cacheManager.del(key);
     }
 }

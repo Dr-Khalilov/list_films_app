@@ -1,8 +1,5 @@
 import {
     Body,
-    CacheInterceptor,
-    CacheKey,
-    CacheTTL,
     Controller,
     Get,
     HttpCode,
@@ -24,10 +21,10 @@ import {
 } from '@nestjs/swagger';
 import { FilmEntity } from './film.entity';
 import { FilmService } from './film.service';
+import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.interceptor';
 import { PaginateResponse } from '../../common/utils/paginate-response.dto';
-import { IQuery } from './query.interface';
 import { FilmDto } from './film.dto';
-import { CacheResponse } from '../../common/enums/cache-response.enum';
+import { IQuery } from './query.interface';
 
 @ApiTags('Films')
 @Injectable()
@@ -41,13 +38,14 @@ export class FilmController {
     @ApiBadRequestResponse()
     @HttpCode(HttpStatus.CREATED)
     @Post()
-    async createOne(@Body() data: FilmDto): Promise<FilmEntity> {
-        return await this.filmService.createFilm(data);
+    async createOne(@Body() data: FilmDto): Promise<{ data: FilmEntity }> {
+        const createdFilm: FilmEntity = await this.filmService.createFilm(data);
+        return { data: createdFilm };
     }
 
     @ApiOperation({ summary: 'Find all films' })
-    @ApiParam({ name: 'page', type: 'integer', required: false })
-    @ApiParam({ name: 'limit', type: 'integer', required: false })
+    @ApiParam({ name: 'page', type: 'number', required: false })
+    @ApiParam({ name: 'limit', type: 'number', required: false })
     @ApiOkResponse({ type: PaginateResponse })
     @ApiNotFoundResponse()
     @HttpCode(HttpStatus.OK)
@@ -71,11 +69,14 @@ export class FilmController {
     @ApiOkResponse({ type: FilmEntity })
     @ApiNotFoundResponse()
     @HttpCode(HttpStatus.OK)
-    @UseInterceptors(CacheInterceptor)
-    @CacheKey(CacheResponse.GET_FILM_TITLE_CACHE)
-    @CacheTTL(15)
+    @UseInterceptors(HttpCacheInterceptor)
     @Get('/:title')
-    async findOne(@Param('title') title: string): Promise<FilmEntity> {
-        return await this.filmService.findFilmByTitle(title);
+    async findOne(
+        @Param('title') title: string,
+    ): Promise<{ data: FilmEntity }> {
+        const foundFilm: FilmEntity = await this.filmService.findFilmByTitle(
+            title,
+        );
+        return { data: foundFilm };
     }
 }

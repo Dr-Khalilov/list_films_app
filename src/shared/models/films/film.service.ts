@@ -11,6 +11,7 @@ import { RedisCacheService } from '../../cache/redis-cache.service';
 import { paginateResponse } from '../../common/utils/paginate-response.util';
 import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { IQuery } from './query.interface';
+import { CacheResponse } from '../../common/enums/cache-response.enum';
 
 @Injectable()
 export class FilmService {
@@ -22,29 +23,37 @@ export class FilmService {
     ) {}
 
     public async createFilm(data): Promise<FilmEntity> {
-        const createdFilm = await this.filmRepository.save(data);
+        const createdFilm: FilmEntity = await this.filmRepository.save(data);
         if (!createdFilm) {
             throw new BadRequestException('The film not saved in database');
         }
+        await this.redisCacheService.clearCache();
         return createdFilm;
     }
 
     public async findFilmByTitle(title: string): Promise<FilmEntity> {
-        const film = await this.filmRepository.findOne({ where: { title } });
+        const film: FilmEntity = await this.filmRepository.findOne({
+            where: { title },
+        });
         if (!film) {
             throw new NotFoundException('Film with this title not found');
         }
-        // await this.redisCacheService.get(film);
+        await this.redisCacheService.set(
+            CacheResponse.GET_FILM_TITLE_CACHE,
+            film,
+        );
+        await this.redisCacheService.get(CacheResponse.GET_FILM_TITLE_CACHE);
         return film;
     }
 
     public async findAllFilms(query: IQuery): Promise<PaginateResponse> {
-        const { page, limit = 10 } = query;
+        const { page, limit } = query;
         const skip = (page - 1) * limit;
-        const data = await this.filmRepository.findAndCount({
-            take: limit,
-            skip: skip,
-        });
+        const data: [FilmEntity[], number] =
+            await this.filmRepository.findAndCount({
+                take: limit,
+                skip: skip,
+            });
         if (!data.length) {
             throw new NotFoundException('No films found in database');
         }

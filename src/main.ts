@@ -27,8 +27,9 @@ const runNestApplication = async (
     const document = SwaggerModule.createDocument(app, swaggerConfigs);
     SwaggerModule.setup('api/docs', app, document);
     const port = configService.get<number>('PORT');
-    await app.listen(port ?? 3001);
-    Logger.log(`Application started on ${await app.getUrl()}`);
+    await app.listen(port ?? 3001, async () => {
+        Logger.log(`Application started on ${await app.getUrl()}`);
+    });
 };
 
 void runNestApplication(new ConfigService());
