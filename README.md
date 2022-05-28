@@ -10,23 +10,22 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
-
-```bash
-$ npm install
-```
-
 ## Running the app
 
 ```bash
-# development
-$ npm run start
+$ ./start-dev.sh
+```
 
-# watch mode
-$ npm run start:dev
+## Stopping the app
 
-# production mode
-$ npm run start:prod
+```bash
+$ CTRL + C or ./stop.sh
+```
+
+## Clear all Docker containers, images and volumes
+
+```bash
+$ ./prune.sh
 ```
 
 ## Redis admin page

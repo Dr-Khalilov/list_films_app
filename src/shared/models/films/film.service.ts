@@ -29,7 +29,6 @@ export class FilmService {
         if (!createdFilm) {
             throw new BadRequestException('The film not saved in database');
         }
-        await this.redisCacheService.clearCache();
         return createdFilm;
     }
 
