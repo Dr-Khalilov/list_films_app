@@ -7,7 +7,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FilmRepository } from './film.repository';
 import { FilmEntity } from './film.entity';
-import { RedisCacheService } from '../../cache/redis-cache.service';
+import { RedisCacheService } from '../../redis-cache/redis-cache.service';
+import { NodeCacheService } from '../../node-cache/node-cache.service';
 import { paginateResponse } from '../../common/utils/paginate-response.util';
 import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { IQuery } from './query.interface';
@@ -19,6 +20,8 @@ export class FilmService {
         private readonly filmRepository: FilmRepository,
         @Inject(RedisCacheService)
         private readonly redisCacheService: RedisCacheService,
+        @Inject(NodeCacheService)
+        private readonly cacheService: NodeCacheService,
     ) {}
 
     public async createFilm(data): Promise<FilmEntity> {
@@ -41,20 +44,19 @@ export class FilmService {
     }
 
     public async findFilmFromCacheOrDb(title: string) {
-        const cache = new Map();
-        if (cache.has(title)) {
-            console.log('Node cache', cache);
-            return cache.get(title);
-        } else if (!cache.has(title)) {
+        if (this.cacheService.getCache().has(title)) {
+            return this.cacheService.getCache().get(title);
+        } else if (!this.cacheService.getCache().has(title)) {
             const filmFromRedisCache = await this.redisCacheService.get(title);
-            console.log('Redis cache', filmFromRedisCache);
             if (filmFromRedisCache) {
                 return filmFromRedisCache;
             } else {
                 const filmFromDb = await this.findFilmByTitle(title);
-                cache.set(title, filmFromDb);
-                await this.redisCacheService.set(title, filmFromDb);
-                setTimeout(() => cache.delete(title), 15000);
+                this.cacheService.getCache().set(title, filmFromDb);
+                setTimeout(
+                    () => this.cacheService.getCache().delete(title),
+                    15000,
+                );
                 return filmFromDb;
             }
         }

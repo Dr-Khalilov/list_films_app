@@ -9,17 +9,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilmRepository } from './models/films/film.repository';
 import { FilmService } from './models/films/film.service';
 import { FilmController } from './models/films/film.controller';
-import { RedisCacheService } from './cache/redis-cache.service';
-import { RedisCacheModule } from './cache/redis-cache.module';
+import { RedisCacheService } from './redis-cache/redis-cache.service';
+import { RedisCacheModule } from './redis-cache/redis-cache.module';
+import { NodeCacheService } from './node-cache/node-cache.service';
+import { NodeCacheModule } from './node-cache/node-cache.module';
 
 const repositories: DynamicModule = TypeOrmModule.forFeature([FilmRepository]);
 
-const services = [FilmService, RedisCacheService];
+const services = [FilmService, RedisCacheService, NodeCacheService];
 
 const controllers = [FilmController];
 
 @Module({
-    imports: [ConfigModule, RedisCacheModule, repositories],
+    imports: [ConfigModule, RedisCacheModule, NodeCacheModule, repositories],
     controllers: [...controllers],
     providers: [...services],
     exports: [...services],

@@ -25,6 +25,7 @@ import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { FilmDto } from './film.dto';
 import { IQuery } from './query.interface';
 import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.interceptor';
+import { NodeCacheService } from '../../node-cache/node-cache.service';
 
 @ApiTags('Films')
 @Injectable()
@@ -32,6 +33,8 @@ import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.inter
 export class FilmController {
     constructor(
         @Inject(FilmService) private readonly filmService: FilmService,
+        @Inject(NodeCacheService)
+        private readonly appCacheService: NodeCacheService,
     ) {}
 
     @ApiOperation({ summary: 'Create a film' })
@@ -73,9 +76,8 @@ export class FilmController {
     @Get('/:title')
     async findOne(
         @Param('title') title: string,
-    ): Promise<{ data: FilmEntity }> {
-        const foundFilm: FilmEntity =
-            await this.filmService.findFilmFromCacheOrDb(title);
+    ): Promise<{ data: string | object }> {
+        const foundFilm = await this.filmService.findFilmFromCacheOrDb(title);
         return { data: foundFilm };
     }
 }
