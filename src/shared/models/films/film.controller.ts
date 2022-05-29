@@ -9,7 +9,6 @@ import {
     Param,
     Post,
     Query,
-    UseInterceptors,
 } from '@nestjs/common';
 import {
     ApiBadRequestResponse,
@@ -21,11 +20,10 @@ import {
 } from '@nestjs/swagger';
 import { FilmEntity } from './film.entity';
 import { FilmService } from './film.service';
+import { NodeCacheService } from '../../node-cache/node-cache.service';
 import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { FilmDto } from './film.dto';
 import { IQuery } from './query.interface';
-import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.interceptor';
-import { NodeCacheService } from '../../node-cache/node-cache.service';
 
 @ApiTags('Films')
 @Injectable()
@@ -34,7 +32,7 @@ export class FilmController {
     constructor(
         @Inject(FilmService) private readonly filmService: FilmService,
         @Inject(NodeCacheService)
-        private readonly appCacheService: NodeCacheService,
+        private readonly nodeCacheService: NodeCacheService,
     ) {}
 
     @ApiOperation({ summary: 'Create a film' })
@@ -62,6 +60,15 @@ export class FilmController {
         });
     }
 
+    @ApiOperation({ summary: 'All data from Node cache' })
+    @ApiOkResponse({ type: FilmEntity })
+    @ApiNotFoundResponse()
+    @HttpCode(HttpStatus.OK)
+    @Get('fetch-data-node-cache')
+    async fetchDataFromNodeCache() {
+        return this.nodeCacheService.getDataFromCache();
+    }
+
     @ApiOperation({ summary: 'Find film by title' })
     @ApiParam({
         name: 'title',
@@ -72,11 +79,10 @@ export class FilmController {
     @ApiOkResponse({ type: FilmEntity })
     @ApiNotFoundResponse()
     @HttpCode(HttpStatus.OK)
-    @UseInterceptors(HttpCacheInterceptor)
     @Get('/:title')
     async findOne(
         @Param('title') title: string,
-    ): Promise<{ data: string | object }> {
+    ): Promise<{ data: object | string | FilmEntity }> {
         const foundFilm = await this.filmService.findFilmFromCacheOrDb(title);
         return { data: foundFilm };
     }

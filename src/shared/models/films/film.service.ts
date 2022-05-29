@@ -21,7 +21,7 @@ export class FilmService {
         @Inject(RedisCacheService)
         private readonly redisCacheService: RedisCacheService,
         @Inject(NodeCacheService)
-        private readonly cacheService: NodeCacheService,
+        private readonly nodeCacheService: NodeCacheService,
     ) {}
 
     public async createFilm(data): Promise<FilmEntity> {
@@ -43,17 +43,19 @@ export class FilmService {
     }
 
     public async findFilmFromCacheOrDb(title: string) {
-        if (this.cacheService.getCache().has(title)) {
-            return this.cacheService.getCache().get(title);
-        } else if (!this.cacheService.getCache().has(title)) {
+        if (this.nodeCacheService.isHasCache(title)) {
+            return this.nodeCacheService.getCache(title);
+        }
+        if (!this.nodeCacheService.isHasCache(title)) {
             const filmFromRedisCache = await this.redisCacheService.get(title);
             if (filmFromRedisCache) {
                 return filmFromRedisCache;
             } else {
                 const filmFromDb = await this.findFilmByTitle(title);
-                this.cacheService.getCache().set(title, filmFromDb);
+                this.nodeCacheService.setCache(title, filmFromDb);
+                await this.redisCacheService.set(title, filmFromDb);
                 setTimeout(
-                    () => this.cacheService.getCache().delete(title),
+                    () => this.nodeCacheService.deleteCacheByKey(title),
                     15000,
                 );
                 return filmFromDb;
