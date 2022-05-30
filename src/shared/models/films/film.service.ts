@@ -43,10 +43,10 @@ export class FilmService {
     }
 
     public async findFilmFromCacheOrDb(title: string) {
-        if (this.nodeCacheService.isHasCache(title)) {
+        if (this.nodeCacheService.hasCache(title)) {
             return this.nodeCacheService.getCache(title);
         }
-        if (!this.nodeCacheService.isHasCache(title)) {
+        if (!this.nodeCacheService.hasCache(title)) {
             const filmFromRedisCache = await this.redisCacheService.get(title);
             if (filmFromRedisCache) {
                 return filmFromRedisCache;

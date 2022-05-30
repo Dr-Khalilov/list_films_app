@@ -16,7 +16,7 @@ export class NodeCacheService {
         return this.cache[key];
     }
 
-    public isHasCache(key: string): boolean {
+    public hasCache(key: string): boolean {
         return this.cache.hasOwnProperty(key);
     }
 
@@ -38,10 +38,12 @@ export class NodeCacheService {
     }
 
     private isEmpty(obj: object): boolean {
-        let response: boolean;
+        let isResponse: boolean;
         Object.keys(obj).forEach(prop =>
-            obj.hasOwnProperty(prop) ? (response = true) : (response = false),
+            obj.hasOwnProperty(prop)
+                ? (isResponse = true)
+                : (isResponse = false),
         );
-        return response;
+        return isResponse;
     }
 }
