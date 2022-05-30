@@ -24,7 +24,7 @@ export class NodeCacheService {
         delete this.cache[key];
     }
 
-    public autoDeleteAfterSetPeriodOfTime(key: string, ttl = 15) {
+    public autoDeleteAfterSetPeriodOfTime(key: string, ttl = 15): void {
         ttl *= 1000;
         setTimeout(() => this.deleteCacheByKey(key), ttl);
     }
