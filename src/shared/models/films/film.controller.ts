@@ -64,7 +64,7 @@ export class FilmController {
     @ApiOkResponse({ type: FilmEntity })
     @ApiNotFoundResponse()
     @HttpCode(HttpStatus.OK)
-    @Get('fetch-data-node-cache')
+    @Get('node-cache')
     async fetchDataFromNodeCache() {
         return this.nodeCacheService.getDataFromCache();
     }

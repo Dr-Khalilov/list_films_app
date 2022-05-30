@@ -50,21 +50,17 @@ export class FilmService {
             const filmFromRedisCache = await this.redisCacheService.get(title);
             if (filmFromRedisCache) {
                 return filmFromRedisCache;
-            } else {
-                const filmFromDb = await this.findFilmByTitle(title);
-                this.nodeCacheService.setCache(title, filmFromDb);
-                await this.redisCacheService.set(title, filmFromDb);
-                setTimeout(
-                    () => this.nodeCacheService.deleteCacheByKey(title),
-                    15000,
-                );
-                return filmFromDb;
             }
+            const filmFromDb = await this.findFilmByTitle(title);
+            this.nodeCacheService.setCache(title, filmFromDb);
+            await this.redisCacheService.set(title, filmFromDb);
+            this.nodeCacheService.autoDeleteAfterSetPeriodOfTime(title, 15);
+            return filmFromDb;
         }
     }
 
     public async findAllFilms(query: IQuery): Promise<PaginateResponse> {
-        const { page, limit } = query;
+        const { page, limit = 10 } = query;
         const skip = (page - 1) * limit;
         const data: [FilmEntity[], number] =
             await this.filmRepository.findAndCount({

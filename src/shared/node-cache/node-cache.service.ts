@@ -24,6 +24,11 @@ export class NodeCacheService {
         delete this.cache[key];
     }
 
+    public autoDeleteAfterSetPeriodOfTime(key: string, ttl = 15) {
+        ttl *= 1000;
+        setTimeout(() => this.deleteCacheByKey(key), ttl);
+    }
+
     public getDataFromCache(): object {
         const data: object = this.cache;
         if (!this.isEmpty(data)) {
