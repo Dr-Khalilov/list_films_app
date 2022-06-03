@@ -12,6 +12,7 @@ import { NodeCacheService } from '../../node-cache/node-cache.service';
 import { paginateResponse } from '../../common/utils/paginate-response.util';
 import { PaginateResponse } from '../../common/utils/paginate-response.dto';
 import { IQuery } from './query.interface';
+import { FilmDto } from './film.dto';
 
 @Injectable()
 export class FilmService {
@@ -24,7 +25,7 @@ export class FilmService {
         private readonly nodeCacheService: NodeCacheService,
     ) {}
 
-    public async createFilm(data): Promise<FilmEntity> {
+    public async createFilm(data: FilmDto): Promise<FilmEntity> {
         const createdFilm: FilmEntity = await this.filmRepository.save(data);
         if (!createdFilm) {
             throw new BadRequestException('The film not saved in database');
