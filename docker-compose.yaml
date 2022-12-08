@@ -1,49 +1,49 @@
 version: '3.9'
 
 services:
-  main:
-    container_name: main
-    build:
-      context: ./
-      dockerfile: ./Dockerfile
-    volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
-    env_file:
-      - .env
-    ports:
-      - ${PORT}:${PORT}
-      - '9229:9229'
-    command: npm run start:dev
-    networks:
-      - films-net
-    depends_on:
-      - redis
-    restart: unless-stopped
-  redis:
-    container_name: redis
-    image: 'redis:alpine3.15'
-    ports:
-      - ${REDIS_PORT}:${REDIS_PORT}
-    env_file:
-      - ./.env
-    networks:
-      - films-net
-  redis-commander:
-    container_name: redis-commander
-    image: rediscommander/redis-commander:latest
-    environment:
-      - REDIS_HOSTS=local:redis:${REDIS_PORT}
-    ports:
-      - ${REDIS_COMMANDER_PORT}:${REDIS_COMMANDER_PORT}
-    networks:
-      - films-net
-    depends_on:
-      - redis
-
-networks:
-  films-net:
-    driver: bridge
+    app:
+        container_name: app
+        build:
+            context: ./
+            dockerfile: ./Dockerfile
+        volumes:
+            - ./:/usr/src/app
+            - /usr/src/app/node_modules
+        env_file:
+            - .env
+        ports:
+            - ${SERVER_PORT}:${SERVER_PORT}
+            - ${DEBUG_PORT}:${DEBUG_PORT}
+        command: npm run start:dev
+        networks:
+            - films-net
+        depends_on:
+            - redis
+        restart: on-failure
+    redis:
+        container_name: redis
+        image: 'redis:alpine3.15'
+        ports:
+            - ${REDIS_PORT}:${REDIS_PORT}
+        networks:
+            - films-net
+        restart: on-failure
+    redis-commander:
+        container_name: redis-commander
+        image: rediscommander/redis-commander:redis-commander-210
+        environment:
+            - REDIS_HOSTS=local:redis:${REDIS_PORT}
+        ports:
+            - ${REDIS_COMMANDER_PORT}:${REDIS_COMMANDER_PORT}
+        networks:
+            - films-net
+        depends_on:
+            - redis
+        restart: on-failure
 
 volumes:
-  main:
+    app:
+
+networks:
+    films-net:
+        driver: bridge

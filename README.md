@@ -3,7 +3,6 @@
 </p>
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
 ## Description
@@ -22,20 +21,20 @@ $ ./start-dev.sh
 $ CTRL + C or ./stop.sh
 ```
 
-## Clear all Docker containers, images and volumes
+## Clear all docker containers, images and volumes
 
 ```bash
 $ ./prune.sh
 ```
 
-## Redis admin page
+## Redis admin panel
 
 ```http request
 http://localhost:8081
 ```
 
-## Swagger documentation
+## Documentation
 
 ```http request
-http://[::1]:3000/api/docs
+http://127.0.0.1:3000/api/docs
 ```

@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import * as Joi from 'joi';
-import { SharedModule } from './shared/shared.module';
-import { getTypeOrmConfigFactory } from './app.database.config';
+import { TypeOrmConfigService } from './app/typeorm-config.service';
+import { RedisCacheModule } from './redis-cache/redis-cache.module';
+import { NodeCacheModule } from './node-cache/node-cache.module';
+import { FilmModule } from './models/films/film.module';
+import { NODE_ENV } from './app/constants/app-constants.enum';
 
 @Module({
     imports: [
@@ -12,26 +16,31 @@ import { getTypeOrmConfigFactory } from './app.database.config';
             cache: true,
             envFilePath: '.env',
             validationSchema: Joi.object({
-                PORT: Joi.number().required(),
+                NODE_ENV: Joi.string()
+                    .required()
+                    .valid(NODE_ENV.DEVELOPMENT, NODE_ENV.PRODUCTION),
+                SERVER_PORT: Joi.number().required(),
+                DEBUG_PORT: Joi.number().required(),
                 DB_TYPE: Joi.string().required(),
-                DB_HOST: Joi.string().required(),
-                DB_PORT: Joi.number().required(),
-                DB_USER: Joi.string().required(),
-                DB_PASSWORD: Joi.string().required(),
-                DB_NAME: Joi.string().required(),
-                TYPEORM_SYNC: Joi.boolean().required(),
-                LOAD_ENTITIES: Joi.boolean().required(),
+                DB_URL: Joi.string().required(),
                 REDIS_PORT: Joi.number().required(),
                 REDIS_HOST: Joi.string().required(),
+                REDIS_USERNAME: Joi.string().required(),
+                REDIS_PASSWORD: Joi.string().required(),
                 REDIS_COMMANDER_PORT: Joi.number().required(),
                 CACHE_TTL: Joi.number().required(),
             }),
         }),
         TypeOrmModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: getTypeOrmConfigFactory,
+            useClass: TypeOrmConfigService,
         }),
-        SharedModule,
+        FilmModule,
+        RedisCacheModule,
+        NodeCacheModule,
     ],
+    controllers: [],
+    providers: [],
 })
-export class AppModule {}
+export class AppModule {
+    constructor(private readonly dataSource: DataSource) {}
+}

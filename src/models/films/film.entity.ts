@@ -4,16 +4,16 @@ import { AbstractEntity } from '../abstract/abstract.entity';
 
 @Entity('films')
 export class FilmEntity extends AbstractEntity {
-    constructor(subscriptionData?: Partial<FilmEntity>) {
-        super();
-        Object.assign(this, subscriptionData);
-    }
-
     @ApiProperty({ example: 'Matrix', description: 'The title of film' })
-    @Column({ type: 'varchar', length: 300, nullable: false })
-    public title: string;
+    @Column({ type: 'varchar', unique: true, length: 300, nullable: false })
+    readonly title: string;
 
     @ApiProperty({ example: 'blabla', description: 'The description of film' })
     @Column({ type: 'text', nullable: false })
-    public body: string;
+    readonly body: string;
+
+    constructor(partialData: Partial<FilmEntity>) {
+        super();
+        Object.assign(this, partialData);
+    }
 }
